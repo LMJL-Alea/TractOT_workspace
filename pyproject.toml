@@ -1,0 +1,28 @@
+[project]
+name = "tractot-workspace"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dipy>=1.12.1",
+    "matplotlib>=3.11.2",
+    "nibabel>=5.4.2",
+    "pandas>=3.0.6",
+    "pot>=0.9.7.post1",
+    "pynrrd>=1.1.3",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
+    "vtk>=9.7.1",
+    "TractOT",
+]
+
+[tool.uv.sources]
+TractOT = { workspace = true }
+
+[tool.uv.workspace]
+members = [
+    "packages/Phantom",
+    "packages/Preprocessing",
+    "packages/TractOT",
+]
