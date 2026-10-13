@@ -8,8 +8,8 @@ import nrrd
 import ot
 import argparse
 
-from TractOT.distances import distances_iso_aniso_along
-from Phantom.add_injury_mcm import colinear_to_isotropification,colinear_to_free_water,colinear_to_reduced_signal,isotropification,reduce_signal
+from tractot.distances import distances_iso_aniso_along
+from phantom.add_injury_mcm import colinear_to_isotropification,colinear_to_free_water,colinear_to_reduced_signal,isotropification,reduce_signal
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-p','--path', type=str,required=True,help="path of input folder's mcm")

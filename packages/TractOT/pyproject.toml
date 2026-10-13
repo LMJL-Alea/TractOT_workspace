@@ -1,7 +1,7 @@
 [project]
 name = "tractot"
 version = "0.1.0"
-description = "Add your description here"
+description = "TractOT is a package to perform tractometry based on MCM"
 readme = "README.md"
 authors = [
     { name = "MaheyG", email = "mrcrpz@hotmail.fr" }

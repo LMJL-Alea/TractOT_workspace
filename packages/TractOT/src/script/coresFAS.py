@@ -5,7 +5,9 @@ Cluster FAS in L group and then average over spatial and FA information
 import argparse
 import numpy as np
 from dipy.io.streamline import load_tractogram,save_tractogram
-from sklearn.cluster import KMeans
+
+from tractot.load_to_numpy import trx_to_numpy_FAT_array,trx_to_numpy_MAT_array
+from tractot.build_cores import infer_labels_svm_endpoint, average_FAS_per_labels
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-t','--augmented_tractogram_path', type=str,required=True,help="path of input augmented tractogram")
@@ -15,6 +17,7 @@ parser.add_argument('-L','--number_of_cores_FAS',type=int,required=True,help="nu
 parser.add_argument('-k','--number_of_dirac_cores_FAS',type=int,required=True,help="number of dirac at each FAP of cores FAS")
 parser.add_argument('-c','--most_colinear',type=str,required=True,help="If true, compute FA of the most colinear compartment, then augmented_tractogram must be a MAS")
 parser.add_argument('-e','--seed',type=int,required=False,help="seed")
+parser.add_argument('-a','--antecedent',type=str,required=True,help="return antecedent of the average or not")
 
 args = parser.parse_args()
 augmented_tractogram_path=args.augmented_tractogram_path
@@ -24,10 +27,12 @@ L=args.number_of_cores_FAS
 k=args.number_of_dirac_cores_FAS
 most_colinear=args.most_colinear
 seed=args.seed
+antecedent=args.antecedent
 
-from TractOT.load_to_numpy import trx_to_numpy_FAT_array,trx_to_numpy_MAT_array
-from TractOT.build_cores import infer_labels_svm_endpoint
-from TractOT.build_cores import average_FAS_per_labels
+if antecedent == "True":
+    antecedent = True
+else:
+    antecedent = False
 
 FAS = load_tractogram(augmented_tractogram_path, reference='same',bbox_valid_check=False) #can be FAS or MAS
 
@@ -50,7 +55,13 @@ else:
 print("Predict parcellation",flush=True)
 labels_svm,labels_clus=infer_labels_svm_endpoint(svm_path,L,m,random_state=seed)
 
-cores_m,cores_w,cores_FA,idx_svm,idx_cluster,size_cluster=average_FAS_per_labels(L,m,FA,labels_svm,labels_clus,k=k,antecedant=False) 
+
+if antecedent:
+    cores_m,cores_w,cores_FA,idx_svm,idx_cluster,size_cluster,idx_antecedent=average_FAS_per_labels(L,m,FA,labels_svm,labels_clus,k=k,antecedent=True) 
+else:
+    cores_m,cores_w,cores_FA,idx_svm,idx_cluster,size_cluster=average_FAS_per_labels(L,m,FA,labels_svm,labels_clus,k=k,antecedent=False) 
+
+
 
 cores=FAS.from_sft(cores_m,FAS)
 dico={}
@@ -59,6 +70,8 @@ dico['FA']=cores_FA
 dico['svm']=idx_svm
 dico['cluster']=idx_cluster
 dico['size cluster']=size_cluster
+if antecedent:
+    dico['antecedent']=idx_antecedent
 
 cores.data_per_point=dico
 save_tractogram(cores,output_path_cores_FAS,bbox_valid_check=False)

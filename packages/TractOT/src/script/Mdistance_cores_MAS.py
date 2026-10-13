@@ -9,10 +9,8 @@ import argparse
 import pandas as pd
 import os.path
 
-import sys
-sys.path.append('../script/')
-from TractOT.distances import distance_cores_svm
-from TractOT.load_to_numpy import trx_to_numpy_MAT_list
+from tractot.distances import distance_coresMAS_svm
+from tractot.load_to_numpy import trx_to_numpy_MAT_list
 
 
 parser = argparse.ArgumentParser()
@@ -98,7 +96,7 @@ if d1==d2:
                     print('Overwritting a distance',end=' ',flush=True)
                 cores2 = load_tractogram(path2+"/"+s2+'/06-AugmentedTractsOT/7'+name+'_'+TRACT+'_L'+L+'_k'+k+'.trx', reference='same',bbox_valid_check=False)
                 m2,wI2,I2,w2,S2,labels_svm2,_=trx_to_numpy_MAT_list(cores2)  
-                cost,_,_,C_nb_pts=distance_cores_svm(m1,m2,wI1,wI2,I1,I2,w1,w2,S1,S2,labels_svm1,labels_svm2,alpha=alpha,beta=beta,sum_or_max=sum_or_max)
+                cost,_,_,C_nb_pts=distance_coresMAS_svm(m1,m2,wI1,wI2,I1,I2,w1,w2,S1,S2,labels_svm1,labels_svm2,alpha=alpha,beta=beta,sum_or_max=sum_or_max)
                 M.at[s1, s2] = cost
                 M.at[s2, s1] = cost
                 #print(C_nb_pts.min())
@@ -116,7 +114,7 @@ else:
                     print('Overwritting a distance',end=' ',flush=True)
                 cores2 = load_tractogram(path2+"/"+s2+'/06-AugmentedTractsOT/7'+name+'_'+TRACT+'_L'+L+'_k'+k+'.trx', reference='same',bbox_valid_check=False)
                 m2,wI2,I2,w2,S2,labels_svm2,_=trx_to_numpy_MAT_list(cores2)  
-                cost,_,_,C_nb_pts=distance_cores_svm(m1,m2,wI1,wI2,I1,I2,w1,w2,S1,S2,labels_svm1,labels_svm2,alpha=alpha,beta=beta,sum_or_max=sum_or_max)
+                cost,_,_,C_nb_pts=distance_coresMAS_svm(m1,m2,wI1,wI2,I1,I2,w1,w2,S1,S2,labels_svm1,labels_svm2,alpha=alpha,beta=beta,sum_or_max=sum_or_max)
                 M.at[s1, s2] = cost
                 #print(C_nb_pts.min())
         #print()

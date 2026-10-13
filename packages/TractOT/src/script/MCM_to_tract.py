@@ -12,6 +12,9 @@ import argparse
 from dipy.io.streamline import load_tractogram,save_tractogram
 from dipy.io.utils import Space
 
+from tractot.add_mcm_to_tract import add_mcm_lift,add_mcm_nolift
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-t','--tractogram_path', type=str,required=True,help="path to input streamlines")
 parser.add_argument('-o','--output_path_tractogram',type=str,required=True,help="output path of obtained augmented tractogram in .trx")
@@ -40,7 +43,6 @@ else:
     reference='same'
 
 
-from TractOT.add_mcm_to_tract import add_mcm_lift,add_mcm_nolift
 
 d=3
 

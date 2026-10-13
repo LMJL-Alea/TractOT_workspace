@@ -4,6 +4,7 @@ Compute Tract Orientation Mapping (TOM).
 
 import nrrd
 import numpy as np
+import nibabel as nib
 import argparse
 
 parser = argparse.ArgumentParser()

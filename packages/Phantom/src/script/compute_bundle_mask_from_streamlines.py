@@ -28,12 +28,12 @@ header=nrrd.read(header_path)[1]
     
 
 tract=load_tractogram(tract_path,reference="same",
-                    #to_space=Space.LPSMM,
                     bbox_valid_check=False,
                     trk_header_check=False)
                     
 origin_tract=tract.space_attributes[0][:3,-1]
 step_tract=np.diag(tract.space_attributes[0])[:3]
+#step_tract=step_tract*2
 
 mask=np.zeros(coordinate.shape[1:])
 mask_start=np.zeros(coordinate.shape[1:])
@@ -46,7 +46,7 @@ for si in range(0,nb_streamline): #nb of streamlines
     streamline_coordinate_end=tract.streamlines[si][-8:]
 
     nb_pts=streamline_coordinate.shape[0]
-    
+
     idx=np.int32(np.round((streamline_coordinate-origin_tract)/step_tract))
     idx_start=np.int32(np.round((streamline_coordinate_start-origin_tract)/step_tract))
     idx_end=np.int32(np.round((streamline_coordinate_end-origin_tract)/step_tract))

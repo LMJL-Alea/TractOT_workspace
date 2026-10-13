@@ -10,7 +10,7 @@ import argparse
 from dipy.io.streamline import load_tractogram
 from dipy.io.utils import Space
 
-from TractOT.utils import most_colinear_compartment,array_to_cov_MAS
+from tractot.utils import most_colinear_compartment,array_to_cov_MAS
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-p','--path', type=str,required=True,help="path of input folder's mcm")
@@ -18,6 +18,8 @@ parser.add_argument('-o','--output_path',type=str,required=True,help="output pat
 parser.add_argument('-t','--tractogram_path',type=str,required=True,help="tractogram path")
 parser.add_argument('-n','--name_tractogram',type=str,required=True,help="tractogram name")
 parser.add_argument('-r','--reference_path',type=str,required=True,help="reference path")
+parser.add_argument('-m','--mcm_name',type=str,required=True,help="name of the mcm")
+
 
 args = parser.parse_args()
 path=args.path
@@ -25,19 +27,17 @@ output_path=args.output_path
 tract_path=args.tractogram_path
 name_tract=args.name_tractogram
 reference_path=args.reference_path
+mcm_name=args.mcm_name
 
 
-
-
-
-mcm_w,header=nrrd.read(path+'MCM_avg_aligned_weights.nrrd')    
+mcm_w,header=nrrd.read(path+mcm_name+'_weights.nrrd')    
 header["sizes"]=np.array([3,40,40,40])
 ksize=mcm_w.shape[0]-1 #shape of the array aka maximum number of compartment
     
 #Load aniso compartment
 mcm_cov=[]
 for i in range(ksize):
-    mcm_cov+=[nrrd.read(path+'MCM_avg_aligned_'+str(i+1)+'.nrrd')[0]]
+    mcm_cov+=[nrrd.read(path+mcm_name+'_'+str(i+1)+'.nrrd')[0]]
 
 #Load tract
 tract = load_tractogram(

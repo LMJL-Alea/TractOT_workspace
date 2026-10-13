@@ -9,7 +9,8 @@ import ot
 import argparse
 import shutil
 
-from Phantom.add_noise_mcm import add_noise_weights,add_noise_eigvals,add_noise_rotation
+from phantom.add_noise_mcm import add_noise_weights,add_noise_eigvals,add_noise_rotation
+from tractot.distances import distances_iso_aniso_along
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-p','--path', type=str,required=True,help="path of input folder's mcm")
@@ -24,10 +25,6 @@ output_path=args.output_path
 mask_path=args.mask_path
 eps=args.epsilon
 original_path=args.original_path
-
-
-from Phantom.add_noise_mcm import add_noise_weights,add_noise_eigvals,add_noise_rotation
-from TractOT.distances import distances_iso_aniso_along
 
 mask=np.bool(nrrd.read(mask_path)[0])
 mcm_w,header_w=nrrd.read(path+'MCM_avg_aligned_weights.nrrd')

@@ -1,7 +1,7 @@
 [project]
 name = "tractot-workspace"
 version = "0.1.0"
-description = "Add your description here"
+description = "TracOT_workspace is a uv workspace to perform tractometry is an Optimal Transport framework."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -15,6 +15,8 @@ dependencies = [
     "scipy>=1.18.1",
     "vtk>=9.7.1",
     "TractOT",
+    "seaborn>=0.13.2",
+    "fury<=1.0.0",
 ]
 
 [tool.uv.sources]

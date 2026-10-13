@@ -10,8 +10,8 @@ import pandas as pd
 import os.path
 
 
-from TractOT.distances import distance_coresFA_svm
-from TractOT.load_to_numpy import trx_to_numpy_FAT_list
+from tractot.distances import distance_coresFA_svm
+from tractot.load_to_numpy import trx_to_numpy_FAT_list
 
 
 parser = argparse.ArgumentParser()

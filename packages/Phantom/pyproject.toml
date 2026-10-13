@@ -1,7 +1,7 @@
 [project]
 name = "phantom"
 version = "0.1.0"
-description = "Add your description here"
+description = "Phantom is a package to construct toy examples where MCM based tractometry is more discriminative than scalar based tractometry."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
