@@ -2,15 +2,12 @@
 Add noise to a MCM.
 """
 
-
 import numpy as np
 import nrrd
-import ot
 import argparse
 import shutil
 
 from phantom.add_noise_mcm import add_noise_weights,add_noise_eigvals,add_noise_rotation
-from tractot.distances import distances_iso_aniso_along
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-p','--path', type=str,required=True,help="path of input folder's mcm")
@@ -75,6 +72,10 @@ shutil.copyfile(original_path+'MCM_avg_aligned_'+str(ksize)+'cpt_aniso.mcm',outp
 
 
 """
+import ot
+from tractot.distances import distances_iso_aniso_along
+
+
 print("Compute distance to original",flush=True)
 mcm_w_original=nrrd.read(original_path+'MCM_avg_aligned/MCM_avg_aligned_weights.nrrd')[0].transpose((1,2,3,0))
 mcm_cov_original=np.zeros(mcm_w.shape[:-1]+(ksize,3,3,))

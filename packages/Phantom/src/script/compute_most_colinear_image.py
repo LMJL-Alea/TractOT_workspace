@@ -5,11 +5,9 @@ Compute the most colinear compartment given a mcm and a set of streamlines
 
 import numpy as np
 import nrrd
-import ot
 import argparse
 from dipy.io.streamline import load_tractogram
 from dipy.io.utils import Space
-
 from tractot.utils import most_colinear_compartment,array_to_cov_MAS
 
 parser = argparse.ArgumentParser()
@@ -30,8 +28,11 @@ reference_path=args.reference_path
 mcm_name=args.mcm_name
 
 
-mcm_w,header=nrrd.read(path+mcm_name+'_weights.nrrd')    
-header["sizes"]=np.array([3,40,40,40])
+mcm_w,header=nrrd.read(path+mcm_name+''
+'_weights.nrrd')
+sizes=header['sizes']
+sizes[0]=3
+header["sizes"]=sizes
 ksize=mcm_w.shape[0]-1 #shape of the array aka maximum number of compartment
     
 #Load aniso compartment
@@ -63,12 +64,14 @@ for si in range(nb_streamline): #nb of streamlines
     Sf=np.zeros((nb_pts,ksize,3,3))
     for i in range(0,ksize):
         Sf[:,i]=array_to_cov_MAS(mcm_cov[i][:,idx[:,0],idx[:,1],idx[:,2]].transpose(1,0))[:,0]
-
+    
+    
     #Compute most colinear compartment
     idx_col=most_colinear_compartment(streamline_coordinate,Sf)
-    img_most_colinear[idx_col,idx[:,0],idx[:,1],idx[:,2]]=1
-    #print(idx_col)
-    
+
+    img_most_colinear[:,idx[:,0],idx[:,1],idx[:,2]]=0 # Fix to avoid having several compartments
+    idx,index=np.unique(idx,axis=0,return_index=True) # Not ideal, should be update
+    img_most_colinear[idx_col[index],idx[:,0],idx[:,1],idx[:,2]]=1
     
 nrrd.write(output_path+'most_colinear_'+name_tract+'.nrrd',img_most_colinear,header=header)
 

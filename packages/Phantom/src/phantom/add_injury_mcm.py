@@ -1,6 +1,6 @@
 import numpy as np
 
-def reduce_signal(D,mask_mostcolinear,l):
+def reduce_signal(D,mask_and_colinear,l):
     """
     Perform isotropification of the most colinear compartment over the mask.
     i.e. compute the optimal transport geodesic between covariate and closest isotropic. 
@@ -11,7 +11,7 @@ def reduce_signal(D,mask_mostcolinear,l):
         Eigenvalues of the MCM aniso covariates
         Is shape is size_img x nb_compartments_aniso x dimension
 
-    mask_mostcolinear : numpy array 
+    mask_and_colinear : numpy array 
         Mask of most colinear compartment
         Is shape is size_img x nb_compartments_aniso
 
@@ -24,11 +24,12 @@ def reduce_signal(D,mask_mostcolinear,l):
         Obtained eigenvalues of the MCM aniso covariates
         Is shape is size_img x nb_compartments_aniso x dimension
     """
-    D_low_signal=np.where(mask_mostcolinear[:,:,:,:,None],D/l,D)
+    
+    D_low_signal=np.where(mask_and_colinear[:,:,:,:,None],D/l,D)
 
     return D_low_signal
 
-def isotropification(D,mask_mostcolinear,t):
+def isotropification(D,mask_and_colinear,t):
     """
     Perform isotropification of the most colinear compartment over the mask.
     i.e. compute the optimal transport geodesic between covariate and closest isotropic. 
@@ -39,7 +40,7 @@ def isotropification(D,mask_mostcolinear,t):
         Eigenvalues of the MCM aniso covariates
         Is shape is size_img x nb_compartments_aniso x dimension
 
-    mask_mostcolinear : numpy array 
+    mask_and_colinear : numpy array 
         Mask of most colinear compartment
         Is shape is size_img x nb_compartments_aniso
 
@@ -53,13 +54,13 @@ def isotropification(D,mask_mostcolinear,t):
         Is shape is size_img x nb_compartments_aniso x dimension
     """
 
-    D_mean=np.mean(D,axis=-1)
-    #D_isotropificated=np.where(mask_mostcolinear[:,:,:,:,None],(1-t)*D+t*D_mean[:,:,:,:,None],D)
-    D_isotropificated=np.where(mask_mostcolinear[:,:,:,:,None],(t**2)*D_mean[:,:,:,:,None]+((1-t)**2)*D+t*(1-t)*np.sqrt(D)*np.sqrt(D_mean[:,:,:,:,None]),D)
+    D_max=np.max(D,axis=-1)
+    #D_isotropificated=np.where(mask_and_colinear[:,:,:,:,None],(1-t)*D+t*D_max[:,:,:,:,None],D)
+    D_isotropificated=np.where(mask_and_colinear[:,:,:,:,None],(t**2)*D_max[:,:,:,:,None]+((1-t)**2)*D+t*(1-t)*np.sqrt(D)*np.sqrt(D_max[:,:,:,:,None]),D)
 
     return D_isotropificated
 
-def colinear_to_free_water(mcm_w,mask,mask_and_colinear,w_free_water):
+def colinear_to_free_water(mcm_w,mask_and_colinear,w_free_water):
     """
     Transfer weight of the most colinear compartment to a new isotropic compartment, over the mask.
 
@@ -68,10 +69,6 @@ def colinear_to_free_water(mcm_w,mask,mask_and_colinear,w_free_water):
     mcm_w : numpy array
         weights of the MCM
         Is shape is size_img x nb_compartments
-
-    mask : numpy array
-        mask where applied the injury
-        Is shape is size_img
 
     mask_and_colinear : numpy array 
         Mask of most colinear compartment and the mask
@@ -86,14 +83,13 @@ def colinear_to_free_water(mcm_w,mask,mask_and_colinear,w_free_water):
         Obtained weights of the aniso
         Is shape is size_img x nb_compartments
     """
-    mcm_w[:,:,:,1:][mask_and_colinear]=mcm_w[:,:,:,1:][mask_and_colinear]-w_free_water
-    mcm_w[:,:,:,1:][mask_and_colinear]=np.maximum(mcm_w[:,:,:,1:][mask_and_colinear],0)
-    mcm_w[:,:,:,0][np.array(mask_and_colinear.sum(-1),dtype=bool)]=mcm_w[:,:,:,0][np.array(mask_and_colinear.sum(-1),dtype=bool)]+w_free_water
-    mcm_w=np.where(mask[:,:,:,None],mcm_w/mcm_w.sum(-1)[:,:,:,None],mcm_w)
+    w=np.minimum(w_free_water,mcm_w[:,:,:,1:][mask_and_colinear])
+    mcm_w[:,:,:,1:][mask_and_colinear]=mcm_w[:,:,:,1:][mask_and_colinear]-w
+    mcm_w[:,:,:,0][np.array(mask_and_colinear.sum(-1),dtype=bool)]=mcm_w[:,:,:,0][np.array(mask_and_colinear.sum(-1),dtype=bool)]+w
 
     return mcm_w
 
-def colinear_to_reduced_signal(D,mcm_w,mask,mask_and_colinear,l,w_reduced_signal):
+def colinear_to_reduced_signal(D,mcm_w,mask_and_colinear,i,w_reduced_signal):
     """
     Transfer weight of the most colinear compartment to a new reduced signal compartment, over the mask.
 
@@ -107,15 +103,11 @@ def colinear_to_reduced_signal(D,mcm_w,mask,mask_and_colinear,l,w_reduced_signal
         weights of the MCM
         Is shape is size_img x nb_compartments
 
-    mask : numpy array
-        mask where applied the injury
-        Is shape is size_img
-
     mask_and_colinear : numpy array 
         Mask of most colinear compartment and the mask
         Is shape is size_img x nb_compartments_aniso
 
-    l : float > 1
+    i : float > 1
         Parameter to scale the eigenvalues, to produce the new reduced signal compartment
 
     w_reduced_signal : float 
@@ -137,19 +129,23 @@ def colinear_to_reduced_signal(D,mcm_w,mask,mask_and_colinear,l,w_reduced_signal
     """
     d=D.shape[-1]
     size_img=mcm_w.shape[:-1]
-    
-    mcm_w_reduced_signal=np.zeros(size_img)
-    D_reduced_signal=np.zeros(size_img+(1,d,))
 
-    mcm_w[:,:,:,1:][mask_and_colinear]=mcm_w[:,:,:,1:][mask_and_colinear]-w_reduced_signal
+    w=np.minimum(w_reduced_signal,mcm_w[:,:,:,1:][mask_and_colinear])
+
+    mcm_w_reduced_signal=np.zeros(size_img)
+    D_reduced_signal=np.zeros(size_img+(d,))
+
+    mcm_w[:,:,:,1:][mask_and_colinear]=mcm_w[:,:,:,1:][mask_and_colinear]-w
     mcm_w[:,:,:,1:][mask_and_colinear]=np.maximum(mcm_w[:,:,:,1:][mask_and_colinear],0)
 
-    mcm_w_reduced_signal[mask]=w_reduced_signal
-    D_reduced_signal[np.array(mask_and_colinear.sum(-1),dtype=bool),0]=D[mask_and_colinear]/l
+    mcm_w_reduced_signal[np.array(mask_and_colinear.sum(-1),dtype=bool)]=w
+    D_reduced_signal[np.array(mask_and_colinear.sum(-1),dtype=bool)]=D[mask_and_colinear]/i
+    #print(D_reduced_signal[np.array(mask_and_colinear.sum(-1),dtype=bool),0][:3])
+    #print(D[mask_and_colinear][:3])
 
     return mcm_w,D_reduced_signal,mcm_w_reduced_signal.reshape(mcm_w_reduced_signal.shape+(1,))
 
-def colinear_to_isotropification(D,mcm_w,mask,mask_and_colinear,w_isotropification):
+def colinear_to_isotropification(D,mcm_w,mask_and_colinear,w_isotropification):
     """
     Transfer weight of the most colinear compartment to a new isotropic compartment, over the mask.
 
@@ -162,10 +158,6 @@ def colinear_to_isotropification(D,mcm_w,mask,mask_and_colinear,w_isotropificati
     mcm_w : numpy array
         weights of the MCM
         Is shape is size_img x nb_compartments
-
-    mask : numpy array
-        mask where applied the injury
-        Is shape is size_img
 
     mask_and_and_colinear : numpy array 
         Mask of most colinear compartment and the mask
@@ -190,15 +182,16 @@ def colinear_to_isotropification(D,mcm_w,mask,mask_and_colinear,w_isotropificati
     """
     d=D.shape[-1]
     size_img=mcm_w.shape[:-1]
-    
+
+    w=np.minimum(w_isotropification,mcm_w[:,:,:,1:][mask_and_colinear])
+
     mcm_w_isotropification=np.zeros(size_img+(1,))
-    D_isotropification=np.zeros(size_img+(1,d,))
+    D_isotropification=np.zeros(size_img+(d,))
 
-    mcm_w[:,:,:,1:][mask_and_colinear]=mcm_w[:,:,:,1:][mask_and_colinear]-w_isotropification
-    mcm_w[:,:,:,1:][mask_and_colinear]=np.maximum(mcm_w[:,:,:,1:][mask_and_colinear],0)
+    mcm_w[:,:,:,1:][mask_and_colinear]=mcm_w[:,:,:,1:][mask_and_colinear]-w
 
-    mcm_w_isotropification[mask,0]=w_isotropification
-    D_isotropification[np.array(mask_and_colinear.sum(-1),dtype=bool),0]=np.tile(D[mask_and_colinear].mean(-1),d).reshape(-1,d)
+    mcm_w_isotropification[np.array(mask_and_colinear.sum(-1),dtype=bool),0]=w
+    D_isotropification[np.array(mask_and_colinear.sum(-1),dtype=bool)]=np.repeat(D[mask_and_colinear].max(-1),d).reshape(-1,d)
 
     return mcm_w,D_isotropification,mcm_w_isotropification
     
