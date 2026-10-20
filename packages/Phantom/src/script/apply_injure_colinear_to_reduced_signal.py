@@ -30,6 +30,8 @@ w_injury=args.weight_injury
 mcm_name_input=args.mcm_name_input
 mcm_name_output=args.mcm_name_output
 
+print("Start colinear to reduced signal")
+
 
 #Load mask
 mask=np.bool(nrrd.read(mask_path)[0])
@@ -42,6 +44,10 @@ mcm_w=mcm_w.transpose((1,2,3,0))
 ksize=mcm_w.shape[-1]-1 #shape of the array aka maximum number of compartment
 size_img=mcm_w.shape[:-1]
 d=3
+
+#This apply injure mights appear after a new compartment is created
+if mask_and_colinear.shape[-1] < ksize: 
+    mask_and_colinear=np.array(np.concatenate((mask_and_colinear,np.zeros(mask_and_colinear.shape[:-1])[:,:,:,None]),axis=-1),dtype=bool)
 
 mcm_cov=np.zeros(mcm_w.shape[:-1]+(ksize,d,d,))
 for i in range(ksize):

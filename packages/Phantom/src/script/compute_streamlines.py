@@ -7,8 +7,9 @@ import numpy as np
 import argparse
 from dipy.io.streamline import load_tractogram,save_tractogram
 from dipy.io.utils import Space
-from tractseg.libs import tractseg_prob_tracking_for_toy
+from tractseg.libs import tractseg_prob_tracking
 
+#If you want to perform tractography for toy+- and Disco example, you might change a little bit the hyperparameters of the original tractseg_prob_tracking.py tractography module. Notably the step size
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-t','--TOM',type=str,required=True,help="TOM")
@@ -38,7 +39,7 @@ bundle_mask=nrrd.read(mask_path)[0]
 start_mask=nrrd.read(start_mask_path)[0]
 end_mask=nrrd.read(end_mask_path)[0]
 
-new_streamlines=tractseg_prob_tracking_for_toy.track(TOM, max_nr_fibers=nb_streamline, smooth=False, compress=0.1, bundle_mask=bundle_mask,
+new_streamlines=tractseg_prob_tracking.track(TOM, max_nr_fibers=nb_streamline, smooth=False, compress=0.1, bundle_mask=bundle_mask,
             start_mask=start_mask, end_mask=end_mask, tracking_uncertainties=None, dilation=0,
             next_step_displacement_std=0.001, nr_cpus=-1, affine=np.eye(4), spacing=1, verbose=True)   
             

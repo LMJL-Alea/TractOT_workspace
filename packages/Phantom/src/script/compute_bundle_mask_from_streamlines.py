@@ -23,6 +23,8 @@ header_path=args.header_path
 coordinate_path=args.coordinate_path
 dilation=args.dilation
 
+print("Start computing masks for tracts")
+
 coordinate=nrrd.read(coordinate_path)[0]
 header=nrrd.read(header_path)[1]
     

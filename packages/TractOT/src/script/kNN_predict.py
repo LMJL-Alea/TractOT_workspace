@@ -15,7 +15,8 @@ def list_of_str(arg):
 parser = argparse.ArgumentParser()
 parser.add_argument('-p','--path',type=str,required=True,help="path to distances matrices")
 parser.add_argument('-d','--datasets',nargs='+',type=str,required=True,help="datasets")
-parser.add_argument('-s','--subjects',nargs='+', type=list_of_str,required=True,help="list of subjects")
+parser.add_argument('-s1','--subjects1',nargs='+', type=str,required=True,help="list of subjects 1")
+parser.add_argument('-s2','--subjects2',nargs='+', type=str,required=True,help="list of subjects 2")
 parser.add_argument('-n','--name', type=str,required=True,help="name of the cores MAS")
 parser.add_argument('-o','--output_path',type=str,required=True,help="Output path for outcome")
 parser.add_argument('-a','--alphas',nargs='+',type=float,required=True,help="alpha parameter")
@@ -31,7 +32,8 @@ args = parser.parse_args()
 path=args.path
 name=args.name
 list_d=args.datasets
-list_subjects=args.subjects
+subjects1=args.subjects1
+subjects2=args.subjects2
 output_path=args.output_path
 alphas=args.alphas
 beta=args.beta
@@ -41,9 +43,10 @@ sum_or_max=args.sum_or_max
 TRACTS=args.tracts
 
 print(list_d)
+list_subjects=[subjects1,subjects2]
 print(list_subjects)
 
-n_seed=10000
+n_seed=100
 n_neighbors=3
 train_size=0.75
 

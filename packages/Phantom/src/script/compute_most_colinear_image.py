@@ -27,6 +27,8 @@ name_tract=args.name_tractogram
 reference_path=args.reference_path
 mcm_name=args.mcm_name
 
+print("Start most colinear mask")
+
 
 mcm_w,header=nrrd.read(path+mcm_name+''
 '_weights.nrrd')

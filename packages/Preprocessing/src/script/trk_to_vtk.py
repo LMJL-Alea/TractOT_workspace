@@ -13,6 +13,8 @@ args = parser.parse_args()
 input_path=args.input_path
 output_path=args.output_path
 
+print("Start trk to vtk")
+
 tract = load_tractogram(
             input_path,
             reference='same',

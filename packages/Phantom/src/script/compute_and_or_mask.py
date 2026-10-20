@@ -15,6 +15,8 @@ args = parser.parse_args()
 masks=args.masks
 output_path=args.output_path
 
+print("Start computing and/or masks")
+
 mask1=nrrd.read(masks[0])[0]
 mask2,header=nrrd.read(masks[1])
 

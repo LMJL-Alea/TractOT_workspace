@@ -44,6 +44,7 @@ name=args.name_cores
 k=args.number_of_compartment_cores
 sum_or_max=args.sum_or_max
 
+print(subjects1)
     
 # Order dataset to avoid redundance
 if d1>d2: #'HCP_105'<'PPMI/Control','PPMI/Control'<'PPMI/PD','PPMI/PD'<'PPMI/Prodromal'
@@ -91,6 +92,7 @@ if d1==d2:
         m1,w1,FA1,labels_svm1,_=trx_to_numpy_FAT_list(cores1)
         for j,s2 in enumerate(subjects2):
             if s1<s2:#Lexicographic order
+                #print(path2+"/"+s2+'/06-AugmentedTractsOT/7'+name+'_'+TRACT+'_L'+L+'_k'+k+'.trx')
                 #print(s2,end=' ',flush=True)
                 if M.at[s1, s2] != 0:
                     print('Overwritting a distance',end=' ',flush=True)

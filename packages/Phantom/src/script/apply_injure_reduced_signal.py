@@ -28,6 +28,8 @@ intensity=args.intensity
 mcm_name_input=args.mcm_name_input
 mcm_name_output=args.mcm_name_output
 
+print("Start reduced signal")
+
 #Load mask
 mask=np.bool(nrrd.read(mask_path)[0])
 mask_mostcolinear=np.bool(nrrd.read(most_colinear_compartment_path)[0]).transpose((1,2,3,0))

@@ -28,6 +28,8 @@ w_injury=args.weight_injury
 mcm_name_input=args.mcm_name_input
 mcm_name_output=args.mcm_name_output
 
+print("Start colinear to isotropification")
+
 
 #Load mask
 mask=np.bool(nrrd.read(mask_path)[0])

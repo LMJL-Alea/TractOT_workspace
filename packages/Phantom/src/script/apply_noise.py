@@ -5,7 +5,6 @@ Add noise to a MCM.
 import numpy as np
 import nrrd
 import argparse
-import shutil
 
 from phantom.add_noise_mcm import add_noise_weights,add_noise_eigvals,add_noise_rotation
 
@@ -15,6 +14,8 @@ parser.add_argument('-g','--original_path', type=str,required=True,help="path of
 parser.add_argument('-o','--output_path',type=str,required=True,help="output path of obtained noisy mcm")
 parser.add_argument('-m','--mask_path',type=str,required=True,help="mask where applied noise")
 parser.add_argument('-e','--epsilon',nargs='+',type=float,required=True,help="3 epsilon for noise")
+parser.add_argument('-n1','--name_mcm_input',type=str,required=True,help="name of the input mcm")
+parser.add_argument('-n2','--name_mcm_output',type=str,required=True,help="name of the output mcm")
 
 args = parser.parse_args()
 path=args.path
@@ -22,17 +23,19 @@ output_path=args.output_path
 mask_path=args.mask_path
 eps=args.epsilon
 original_path=args.original_path
+name_mcm_input=args.name_mcm_input
+name_mcm_output=args.name_mcm_output
 
 mask=np.bool(nrrd.read(mask_path)[0])
-mcm_w,header_w=nrrd.read(path+'MCM_avg_aligned_weights.nrrd')
+mcm_w,header_w=nrrd.read(path+name_mcm_input+'_weights.nrrd')
 mcm_w=mcm_w.transpose((1,2,3,0))
 ksize=mcm_w.shape[-1]-1 #shape of the array aka maximum number of compartment
 
-I,header_I=nrrd.read(path+'MCM_avg_aligned_'+str(0)+'.nrrd')
+I,header_I=nrrd.read(path+name_mcm_input+'_'+str(0)+'.nrrd')
 
 mcm_cov=np.zeros(mcm_w.shape[:-1]+(ksize,3,3,))
 for i in range(ksize):
-    compartment_i,header_cov=nrrd.read(path+'MCM_avg_aligned_'+str(i+1)+'.nrrd')
+    compartment_i,header_cov=nrrd.read(path+name_mcm_input+'_'+str(i+1)+'.nrrd')
     compartment_i=compartment_i.transpose(1,2,3,0)
     mcm_cov[:,:,:,i,0,0]=compartment_i[:,:,:,0]
     mcm_cov[:,:,:,i,:2,1]=compartment_i[:,:,:,1:3]
@@ -55,8 +58,8 @@ mcm_cov_noisy_eigvals=np.einsum('...ij,...j,...jk->...ik',V,D_noisy,V.transpose(
 mcm_cov_noisy=add_noise_rotation(mcm_cov_noisy_eigvals,mask,eps[2])
     
 #Write
-nrrd.write(output_path+'MCM_avg_aligned/MCM_avg_aligned_weights.nrrd',mcm_w_noisy.transpose((3,0,1,2)),header=header_w)
-nrrd.write(output_path+'MCM_avg_aligned/MCM_avg_aligned_0.nrrd',I,header=header_I)
+nrrd.write(output_path+name_mcm_output+'_weights.nrrd',mcm_w_noisy.transpose((3,0,1,2)),header=header_w)
+nrrd.write(output_path+name_mcm_output+'_0.nrrd',I,header=header_I)
 
 for i in range(ksize):
     compartment_i=np.zeros((6,)+mcm_cov.shape[:-3])
@@ -66,9 +69,8 @@ for i in range(ksize):
     compartment_i[3]=mcm_cov_noisy[:,:,:,i,0,2]
     compartment_i[4]=mcm_cov_noisy[:,:,:,i,1,2]
     compartment_i[5]=mcm_cov_noisy[:,:,:,i,2,2]
-    nrrd.write(output_path+'MCM_avg_aligned/MCM_avg_aligned_'+str(i+1)+'.nrrd', compartment_i,header=header_cov)
+    nrrd.write(output_path+name_mcm_output+'_'+str(i+1)+'.nrrd', compartment_i,header=header_cov)
     
-shutil.copyfile(original_path+'MCM_avg_aligned_'+str(ksize)+'cpt_aniso.mcm',output_path+'MCM_avg_aligned.mcm')
 
 
 """

@@ -28,6 +28,8 @@ w_injury=args.weight_injury
 mcm_name_input=args.mcm_name_input
 mcm_name_output=args.mcm_name_output
 
+print("Start colinear to free water")
+
 #Load mask
 mask=np.bool(nrrd.read(mask_path)[0])
 mask_mostcolinear=np.bool(nrrd.read(most_colinear_compartment_path)[0]).transpose((1,2,3,0))
@@ -37,6 +39,7 @@ mask_and_colinear=np.logical_and(mask[:,:,:,None],mask_mostcolinear)
 mcm_w,header_w=nrrd.read(path+mcm_name_input+'_weights.nrrd')
 mcm_w=mcm_w.transpose((1,2,3,0))
 ksize=mcm_w.shape[-1]-1 #shape of the array aka maximum number of compartment
+
 
 
 #Transfer weights to new compartment

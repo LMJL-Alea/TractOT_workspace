@@ -28,6 +28,8 @@ t_geodesic=args.t_geodesic
 mcm_name_input=args.mcm_name_input
 mcm_name_output=args.mcm_name_output
 
+print("Start isotropification")
+
 
 #Load mask
 mask=np.bool(nrrd.read(mask_path)[0])
