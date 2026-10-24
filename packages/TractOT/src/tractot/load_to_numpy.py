@@ -144,22 +144,22 @@ def trx_to_numpy_MAT_list(MAT,nb_MAT=None):
 
 
 
-def trx_to_numpy_FAT_array(FAT,nb_FAS=None,streamlineId=None,d=3):
+def trx_to_numpy_SAT_array(SAT,nb_SAS=None,streamlineId=None,d=3):
     """
-    Convert a FA Augmented Tractogram as StatefulTractogram into numpy arrays. 
-    All FAS must have the same number of FAP 
+    Convert a Scalar Augmented Tractogram as StatefulTractogram into numpy arrays. 
+    All SAS must have the same number of SAP 
     
     Parameters
     ----------
-    FAT : StatefulTractogram (Dipy)
-        FA Augmented Tractogram
+    SAT : StatefulTractogram (Dipy)
+        Scalar Augmented Tractogram
         
-    nb_FAS : int
-        Number of FAS to load
+    nb_SAS : int
+        Number of SAS to load
 
     streamlineId : list
-        list of index of the FAS to load
-        Is length is nb_FAS
+        list of index of the SAS to load
+        Is length is nb_SAS
         
     d : int
         Dimension
@@ -167,83 +167,83 @@ def trx_to_numpy_FAT_array(FAT,nb_FAS=None,streamlineId=None,d=3):
     Returns 
     -------
     m : numpy array
-        spatial information of the FAS
-        Is shape is nb_FAS x nb_FAP x d
+        spatial information of the SAS
+        Is shape is nb_SAS x nb_SAP x d
 
-    FA: numpy array
-        FA of the FAS
-        Is shape is nb_FAS x nb_FAP
+    Scalar: numpy array
+        Scalar of the SAS
+        Is shape is nb_SAS x nb_SAP
 
-    nb_FAP : int
-        number of points for the FAS
+    nb_SAP : int
+        number of points for the SAS
     """
     
-    if nb_FAS is None:
-        nb_FAS=len(FAT.streamlines)
+    if nb_SAS is None:
+        nb_SAS=len(SAT.streamlines)
     
-    nb_FAP=FAT.streamlines[0].shape[0]
+    nb_SAP=SAT.streamlines[0].shape[0]
 
-    m=np.zeros((nb_FAS,nb_FAP,d))
-    FA=np.zeros((nb_FAS,nb_FAP))
+    m=np.zeros((nb_SAS,nb_SAP,d))
+    Scalar=np.zeros((nb_SAS,nb_SAP))
     
-    for i in range(0,nb_FAS):
+    for i in range(0,nb_SAS):
         if streamlineId is None:
-            m[i] = FAT.streamlines[i]
-            FA[i] = FAT.data_per_point["FA"][i].reshape(-1)
+            m[i] = SAT.streamlines[i]
+            Scalar[i] = SAT.data_per_point["scalar"][i].reshape(-1)
         else:
-            m[i] = FAT.streamlines[streamlineId[i]]            
-            FA[i] = FAT.data_per_point["FA"][streamlineId[i]].reshape(-1)
+            m[i] = SAT.streamlines[streamlineId[i]]            
+            Scalar[i] = SAT.data_per_point["scalar"][streamlineId[i]].reshape(-1)
 
-    return m,FA,nb_FAP
+    return m,Scalar,nb_SAP
     
     
-def trx_to_numpy_FAT_list(FAT,nb_FAS=None):
+def trx_to_numpy_SAT_list(SAT,nb_SAS=None):
     """
-    Convert a FA Augmented Tractogram as StatefulTractogram into list of numpy arrays. 
-    Every FAS can have different number of FAP 
-    Used for cores FAS
+    Convert a Scalar Augmented Tractogram as StatefulTractogram into list of numpy arrays. 
+    Every SAS can have different number of SAP 
+    Used for cores SAS
     
     Parameters
     ----------
-    FAT : StatefulTractogram (Dipy)
-        FA Augmented Tractogram
+    SAT : StatefulTractogram (Dipy)
+        Scalar Augmented Tractogram
         
-    nb_FAS : int
-        Number of FAS to load
+    nb_SAS : int
+        Number of SAS to load
         
     Returns 
     -------
     m : list
-        spatial information of the FAS
-        Is shape is nb_FAS_i x nb_FAP_i x d
+        spatial information of the SAS
+        Is shape is nb_SAS_i x nb_SAP_i x d
 
     w : list
-        weights of the FA centroids
-        Is shape is nb_FAS_i x nb_FAP_i x nb_centroid
+        weights of the Scalar centroids
+        Is shape is nb_SAS_i x nb_SAP_i x nb_centroid
 
-    FA : list
-        centroids of FA of the FAS
-        Is shape is nb_FAS x nb_FAP x nb_centroids
+    Scalar : list
+        centroids of Scalar of the SAS
+        Is shape is nb_SAS x nb_SAP x nb_centroids
 
     labels_svm : list 
-        svm label assigned to each FAP 
-        Is shape is nb_FAS_i x nb_FAP_i
+        svm label assigned to each SAP 
+        Is shape is nb_SAS_i x nb_SAP_i
 
-    nb_FAP : int
-        number of points for the FAS
+    nb_SAP : int
+        number of points for the SAS
     """
-    if nb_FAS is None:
-        nb_FAS=len(FAT.streamlines)
+    if nb_SAS is None:
+        nb_SAS=len(SAT.streamlines)
     
-    m,w,FA,labels_svm,nb_FAP=[],[],[],[],[]
-    for i in range(nb_FAS):
-        m+=[FAT.streamlines[i]]
-        w+=[FAT.data_per_point['weights'][i]]
-        FA+=[FAT.data_per_point['FA'][i]]
-        labels_svm+=[FAT.data_per_point['svm'][i].reshape(-1)]
-        nb_FAP+=[FAT.streamlines[i].shape[0]]
+    m,w,Scalar,labels_svm,nb_SAP=[],[],[],[],[]
+    for i in range(nb_SAS):
+        m+=[SAT.streamlines[i]]
+        w+=[SAT.data_per_point['weights'][i]]
+        Scalar+=[SAT.data_per_point['scalar'][i]]
+        labels_svm+=[SAT.data_per_point['svm'][i].reshape(-1)]
+        nb_SAP+=[SAT.streamlines[i].shape[0]]
 
-    return m,w,FA,labels_svm,nb_FAP
+    return m,w,Scalar,labels_svm,nb_SAP
 
 """
 def vtk_to_numpy_tract_list(tract,nb_streamline=1,streamlineId=None,d=3):

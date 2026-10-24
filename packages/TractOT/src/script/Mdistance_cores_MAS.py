@@ -26,7 +26,7 @@ parser.add_argument('-s1','--subjects1', nargs='+', type=str,required=True,help=
 parser.add_argument('-s2','--subjects2', nargs='+', type=str,required=True,help='name of the subject for second data set')
 parser.add_argument('-a','--alpha', type=float,required=True,help='alpha parameter, trade off spatial/diffusion in distance')
 parser.add_argument('-b','--beta', type=int,required=True,help='beta parameter, trade off spatial/diffusion in assignment')
-parser.add_argument('-s','--sum_or_max',type=str,required=True,help="sum or max when comparing MAP along streamline")
+parser.add_argument('-s','--sum_or_max',type=str,required=True,help="sum or max when comparing MAP along streamline and sets of cores")
 
 args = parser.parse_args()
 path=args.path

@@ -15,6 +15,7 @@ parser.add_argument('-o','--output_path',type=str,required=True,help="output pat
 parser.add_argument('-e','--header_path',type=str,required=True,help="header")
 parser.add_argument('-c','--coordinate_path',type=str,required=True,help="coordinate")
 parser.add_argument('-d','--dilation',type=int,required=True,help="dilation of mask")
+parser.add_argument('-r','--reference_path',type=str,required=True,help="reference path")
 
 args = parser.parse_args()
 tract_path=args.tract_path
@@ -22,6 +23,7 @@ output_path=args.output_path
 header_path=args.header_path
 coordinate_path=args.coordinate_path
 dilation=args.dilation
+reference_path=args.reference_path
 
 print("Start computing masks for tracts")
 
@@ -29,7 +31,7 @@ coordinate=nrrd.read(coordinate_path)[0]
 header=nrrd.read(header_path)[1]
     
 
-tract=load_tractogram(tract_path,reference="same",
+tract=load_tractogram(tract_path,reference=reference_path,
                     bbox_valid_check=False,
                     trk_header_check=False)
                     

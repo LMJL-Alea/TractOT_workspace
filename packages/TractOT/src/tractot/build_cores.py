@@ -12,59 +12,70 @@ def warn(*args, **kwargs):
 import warnings
 warnings.warn = warn
 
-def average_FAS_per_labels(n_clusters,m,FA,labels_svm,labels_clus,k=1,antecedent=False):       
+def average_SAS_per_labels(n_clusters,m,Scalar,labels_svm,labels_clus,k=1,antecedent=False):       
     """
-    Compute cores FAS 
+    Compute cores SAS 
 
-    This function compute cores FAS by k-means of FA, given clusters
-    At each FAP of the cores, FA is represented as a probability  
+    This function compute cores SAS by k-means of scalar, given clusters
+    At each SAP of the cores, SA is represented as a probability  
 
     Parameters
     ----------
     n_clusters : positive integer
-        Number of target cores FAS
+        Number of target cores SAS
+
     m : numpy array 
-        Euclidean coordinate of the FAS. 
-        Is shape is nb_FASxnb_FAPx3
-    FA : numpy array
-        An array of FA. 
-        Is shape is nb_FASxnb_FAP
+        Euclidean coordinate of the SAS. 
+        Is shape is nb_SASxnb_SAPx3
+
+    Scalar : numpy array
+        An array of scalar. 
+        Is shape is nb_SASxnb_SAP
+
     labels_svm: numpy array
-        Label of each FAP given by an SVM 
-        Is shape is nb_FASxnb_FAP
+        Label of each SAP given by an SVM 
+        Is shape is nb_SASxnb_SAP
+
     labels_clus: numpy array
-        Label of each FAS
-        Is shape is nb_FAS
+        Label of each SAS
+        Is shape is nb_SAS
+
     k: positive integer
-        Number of FA for each FAP of the output
+        Number of scalar for each SAP of the output
     antecedent: Boolean
         Indices of the antecedent for the averages
         
     Returns
-    Note: returns list since cores FAS might have different number of FAP
+    Note: returns list since cores SAS might have different number of SAP
     -------
     cores_m : list of numpy array
-        A list of array for the Euclidean coordinate of the cores FAS
+        A list of array for the Euclidean coordinate of the cores SAS
         List has length n_clusters
+
     cores_w: list of numpy array
-        A list of array for weights of the probability FA of the cores FAS
-        List has length n_clustersxnb_FAPxk
-    cores_FA: list of numpy array
-        A list of array of the probability FA of the cores FAS
-        List has length n_clustersxnb_FAPxk
+        A list of array for weights of the probability scalar of the cores SAS
+        List has length n_clustersxnb_SAPxk
+
+    cores_scalar: list of numpy array
+        A list of array of the probability scalar of the cores SAS
+        List has length n_clustersxnb_SAPxk
+
     idx_svm_l: list of numpy array
-        A list with svm labels of each point of the cores FAS 
+        A list with svm labels of each point of the cores SAS 
+
     idx_cluster: list of numpy array
-        A list with cluster labels of each point of the cores FAS
-        Note that each FAS as the label along its FAP
+        A list with cluster labels of each point of the cores SAS
+        Note that each SAS as the label along its SAP
+
     size_cluster: list of numpy array
-        A list containg the number of FAP that have been averaging to obtain each FAP of the cores FAS
+        A list containing the number of SAP that have been averaging to obtain each SAP of the cores SAS
+
     idx_antecedent: list of list
-        A list containg the indices of the antecedent for each averaged FAP
+        A list containing the indices of the antecedent for each averaged SAP
     """
     nb_pts=m.shape[1]
         
-    cores_m,cores_w,cores_FA,idx_svm_l,idx_cluster,size_cluster,idx_antecedent=[],[],[],[],[],[],[]
+    cores_m,cores_w,cores_scalar,idx_svm_l,idx_cluster,size_cluster,idx_antecedent=[],[],[],[],[],[],[]
     for i in range(n_clusters):
         print('l = ',i,end=' : ',flush=True)
         
@@ -73,7 +84,7 @@ def average_FAS_per_labels(n_clusters,m,FA,labels_svm,labels_clus,k=1,antecedent
         
         cores_m_i=np.zeros((nb_pts_i,3))
         cores_w_i=np.zeros((nb_pts_i,k))
-        cores_FA_i=np.zeros((nb_pts_i,k))
+        cores_scalar_i=np.zeros((nb_pts_i,k))
         idx_svm_i=np.zeros(nb_pts_i)
         size_cluster_i=np.zeros(nb_pts_i)
         idx_antecedent_i=[]
@@ -89,11 +100,11 @@ def average_FAS_per_labels(n_clusters,m,FA,labels_svm,labels_clus,k=1,antecedent
             #spatial
             cores_m_i[j]=np.mean(m[labels_clus==i][labels_svm[labels_clus==i]==idx_svm],axis=0)
             
-            #FA
+            #Scalar
             k_i=np.int8(min(k,size_cluster_i[j])) #Ensure that k<size_cluster_i
-            kmeans = KMeans(n_clusters=k_i, random_state=0).fit(FA[labels_clus==i][labels_svm[labels_clus==i]==idx_svm].reshape(-1,1))
+            kmeans = KMeans(n_clusters=k_i, random_state=0).fit(Scalar[labels_clus==i][labels_svm[labels_clus==i]==idx_svm].reshape(-1,1))
             kf=np.unique(kmeans.labels_).shape[0] #Deals with repetition of centroids
-            cores_FA_i[j,:kf]=kmeans.cluster_centers_[np.unique(kmeans.labels_),0]
+            cores_scalar_i[j,:kf]=kmeans.cluster_centers_[np.unique(kmeans.labels_),0]
             cores_w_i[j,:kf]=np.unique(kmeans.labels_, return_counts=True)[1]
             cores_w_i[j]/=np.sum(cores_w_i[j])
             
@@ -102,7 +113,7 @@ def average_FAS_per_labels(n_clusters,m,FA,labels_svm,labels_clus,k=1,antecedent
 
         cores_m+=[cores_m_i]
         cores_w+=[cores_w_i]
-        cores_FA+=[cores_FA_i]
+        cores_scalar+=[cores_scalar_i]
         idx_cluster+=[idx_cluster_i]
         idx_svm_l+=[idx_svm_i]
         size_cluster+=[size_cluster_i]
@@ -110,9 +121,9 @@ def average_FAS_per_labels(n_clusters,m,FA,labels_svm,labels_clus,k=1,antecedent
         print()
     
     if antecedent:
-        return cores_m,cores_w,cores_FA,idx_svm_l,idx_cluster,size_cluster,idx_antecedent
+        return cores_m,cores_w,cores_scalar,idx_svm_l,idx_cluster,size_cluster,idx_antecedent
     else:
-        return cores_m,cores_w,cores_FA,idx_svm_l,idx_cluster,size_cluster
+        return cores_m,cores_w,cores_scalar,idx_svm_l,idx_cluster,size_cluster
 
 
 

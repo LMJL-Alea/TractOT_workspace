@@ -556,30 +556,30 @@ def distance_coresMAS_svm(m1,m2,wI1,wI2,I1,I2,w1,w2,S1,S2,labels_svm1,labels_svm
     return cost,sigma,C,C_nb_MAP  
 
 
-def distances_FAS_svm(m1,m2,w1,w2,FA1,FA2,labels_svm1,labels_svm2,alpha=0.5,sum_or_max='sum'):
+def distances_SAS_svm(m1,m2,w1,w2,Scalar1,Scalar2,labels_svm1,labels_svm2,alpha=0.5,sum_or_max='sum'):
     """
-    Compute the matrix of pairwise distances between two sets of FAS with possibly different number of FAP for each FAS
+    Compute the matrix of pairwise distances between two sets of SAS with possibly different number of SAP for each SAS
 
     Parameters
     ----------
     mi : list of numpy array
-        spatial information of the i-th set of FAS
-        List has length nb_FAS and each elements has shape nb_FAP_jx3 
+        spatial information of the i-th set of SAS
+        List has length nb_SAS and each elements has shape nb_SAP_jx3 
         i=1,2 and j in [1,40]
         
     wi : list of numpy array
-        weight of the FA probability for the i-th set of FAS
-        List has length nb_FAS and each elements has shape nb_FAP_jxk
+        weight of the scalar probability for the i-th set of SAS
+        List has length nb_SAS and each elements has shape nb_SAP_jxk
         i=1,2 and j in [1,40]
          
-    FAi : list of numpy array
-        values of the FA probability for the i-th set of FAS
-        List has length nb_FAS and each elements has shape nb_FAP_jxk 
+    Scalari : list of numpy array
+        values of the scalar probability for the i-th set of SAS
+        List has length nb_SAS and each elements has shape nb_SAP_jxk 
         i=1,2 and j in [1,40]
         
     labels_svmi : list of numpy array
-        Labels of each MAP of the i-th set of MAS 
-        List has length nb_MAS and each elements has shape nb_MAP_j 
+        Labels of each SAP of the i-th set of SAS 
+        List has length nb_SAS and each elements has shape nb_SAP_j 
         i=1,2 and j in [1,40]
         
     alpha: real number between 0 and 1
@@ -591,24 +591,24 @@ def distances_FAS_svm(m1,m2,w1,w2,FA1,FA2,labels_svm1,labels_svm2,alpha=0.5,sum_
         and only diffusion information (beta=0). Alpha acts on the cost matrix to compute transport plan
     
     sum_or_max: string
-        sum_or_max indicates if the distance along a FAS should be maximum or sum of FAP
+        sum_or_max indicates if the distance along a SAS should be maximum or sum of SAP and the final distance between two sets of cores SAS should be maximum or sum
         
         
     Returns
     -------
     C : numpy array
-        Matrix of pairwise W distances between two FAS
-        Is shape is nb_FASxnb_FAS
+        Matrix of pairwise W distances between two SAS
+        Is shape is nb_SASxnb_SAS
         
-    C_nb_FAS : numpy array
-        Number of FAP used to compute the distances between the two map. That is the intersection of the two set of labels
-        Is shape is nb_FASxnb_FAS
+    C_nb_SAS : numpy array
+        Number of SAP used to compute the distances between the two map. That is the intersection of the two set of labels
+        Is shape is nb_SASxnb_SAS
         
     """   
     
     L1,L2=len(m1),len(m2)
     C=np.zeros((L1,L2))
-    C_nb_FAP=np.zeros((L1,L2))
+    C_nb_SAP=np.zeros((L1,L2))
     
     for l1 in range(L1):
         for l2 in range(L2):
@@ -619,39 +619,39 @@ def distances_FAS_svm(m1,m2,w1,w2,FA1,FA2,labels_svm1,labels_svm2,alpha=0.5,sum_
                     cost+=[np.sum((m1[l1][labels_svm1[l1]==idx][0]-m2[l2][labels_svm2[l2]==idx][0])**2)]
                 else:
                     cost+=[alpha*np.sum((m1[l1][labels_svm1[l1]==idx][0]-m2[l2][labels_svm2[l2]==idx][0])**2)+
-                       (1-alpha)*ot.emd2_1d(FA1[l1][labels_svm1[l1]==idx][0],FA2[l2][labels_svm2[l2]==idx][0],w1[l1][labels_svm1[l1]==idx][0],w2[l2][labels_svm2[l2]==idx][0],p=2)] #use the 1d Wasserstein distance
+                       (1-alpha)*ot.emd2_1d(Scalar1[l1][labels_svm1[l1]==idx][0],Scalar2[l2][labels_svm2[l2]==idx][0],w1[l1][labels_svm1[l1]==idx][0],w2[l2][labels_svm2[l2]==idx][0],p=2)] #use the 1d Wasserstein distance
             if sum_or_max=='sum':
                 C[l1,l2]=sum(cost)
             if sum_or_max=='max':
                 C[l1,l2]=max(cost)
-            C_nb_FAP[l1,l2]=labels_svm_intersect.shape[0]
-    return C/C_nb_FAP,C_nb_FAP
+            C_nb_SAP[l1,l2]=labels_svm_intersect.shape[0]
+    return C/C_nb_SAP,C_nb_SAP
 
-def distance_coresFA_svm(m1,m2,w1,w2,FA1,FA2,labels_svm1,labels_svm2,alpha=0.5,beta=None,sum_or_max='sum'):    
+def distance_coresScalar_svm(m1,m2,w1,w2,Scalar1,Scalar2,labels_svm1,labels_svm2,alpha=0.5,beta=None,sum_or_max='sum'):    
     
     """
-    Compute the distance between two sets of FAS with same number of FAS put possibly different number of FAP for each FAS
+    Compute the distance between two sets of SAS with same number of SAS put possibly different number of SAP for each SAS
 
     Parameters
     ----------
     mi : list of numpy array
-        spatial information of the i-th set of FAS
-        List has length nb_FAS and each elements has shape nb_FAP_jx3 
+        spatial information of the i-th set of SAS
+        List has length nb_SAS and each elements has shape nb_SAP_jx3 
         i=1,2 and j in [1,40]
         
     wi : list of numpy array
-        weight of the FA probability for the i-th set of FAS
-        List has length nb_FAS and each elements has shape nb_FAP_jxk
+        weight of the scalar probability for the i-th set of SAS
+        List has length nb_SAS and each elements has shape nb_SAP_jxk
         i=1,2 and j in [1,40]
          
-    FAi : list of numpy array
-        values of the FA probability for the i-th set of FAS
-        List has length nb_FAS and each elements has shape nb_FAP_jxk 
+    Scalari : list of numpy array
+        values of the scalar probability for the i-th set of SAS
+        List has length nb_SAS and each elements has shape nb_SAP_jxk 
         i=1,2 and j in [1,40]
         
     labels_svmi : list of numpy array
-        Labels of each MAP of the i-th set of MAS 
-        List has length nb_MAS and each elements has shape nb_MAP_j 
+        Labels of each SAP of the i-th set of SAS 
+        List has length nb_SAS and each elements has shape nb_SAP_j 
         i=1,2 and j in [1,40]
         
     alpha: real number between 0 and 1
@@ -663,25 +663,25 @@ def distance_coresFA_svm(m1,m2,w1,w2,FA1,FA2,labels_svm1,labels_svm2,alpha=0.5,b
         and only diffusion information (beta=0). Alpha acts on the cost matrix to compute transport plan
     
     sum_or_max: string
-        sum_or_max indicates if the distance along a FAS should be maximum or sum of FAP
+        sum_or_max indicates if the distance along a SAS should be maximum or sum of SAP
         
         
     Returns
     -------
     cost: positive number
-        Distance between two sets of FAS, after optimal assignment of each FAS
+        Distance between two sets of SAS, after optimal assignment of each SAS
         
     sigma: numpy array
-        Optimal permutations between the two sets of FAS
-        Is shape us nb_FAS
+        Optimal permutations between the two sets of SAS
+        Is shape us nb_SAS
         
     C : numpy array
-        Matrix of pairwise W distances between two FAS
-        Is shape is nb_FASxnb_FAS
+        Matrix of pairwise W distances between two SAS
+        Is shape is nb_SASxnb_SAS
         
-    C_nb_FAS : numpy array
-        Number of FAP used to compute the distances between the two map. That is the intersection of the two set of labels
-        Is shape is nb_FASxnb_FAS
+    C_nb_SAS : numpy array
+        Number of SAP used to compute the distances between the two map. That is the intersection of the two set of labels
+        Is shape is nb_SASxnb_SAS
         
     """   
 
@@ -690,19 +690,19 @@ def distance_coresFA_svm(m1,m2,w1,w2,FA1,FA2,labels_svm1,labels_svm2,alpha=0.5,b
         beta=alpha
         
     #Compute assignement wrt to cost matrix computed with beta
-    C,C_nb_FAP=distances_FAS_svm(m1,m2,w1,w2,FA1,FA2,labels_svm1,labels_svm2,alpha=beta)
+    C,C_nb_SAP=distances_SAS_svm(m1,m2,w1,w2,Scalar1,Scalar2,labels_svm1,labels_svm2,alpha=beta)
     P=ot.emd([],[],C)
     sigma=np.nonzero(P)[1]
     
     #Compute OT distance wrt to cost matrix computed with alpha
-    C,C_nb_FAP=distances_FAS_svm(m1,m2,w1,w2,FA1,FA2,labels_svm1,labels_svm2,alpha=alpha)
+    C,C_nb_SAP=distances_SAS_svm(m1,m2,w1,w2,Scalar1,Scalar2,labels_svm1,labels_svm2,alpha=alpha)
     C=C/P.shape[0] #renormalize
     if sum_or_max=='sum':
         cost=np.sum(C*P) #P sum to one
     if sum_or_max=='max':
         cost=np.max(C*P)
         
-    return cost,sigma,C,C_nb_FAP 
+    return cost,sigma,C,C_nb_SAP 
     
 '''
 def distance_aniso(S1,S2):
