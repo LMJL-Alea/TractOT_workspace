@@ -31,6 +31,12 @@ mcm_w,header_w=nrrd.read(path+name_mcm_input+'_weights.nrrd')
 mcm_w=mcm_w.transpose((1,2,3,0))
 ksize=mcm_w.shape[-1]-1 #shape of the array aka maximum number of compartment
 
+
+if ksize == 3: # hot fix to ensure similar noise between patients with 3 and 5 compartments
+    print('rescale noise over weights')
+    eps[0]=eps[0]*25/9
+
+
 I,header_I=nrrd.read(path+name_mcm_input+'_'+str(0)+'.nrrd')
 
 mcm_cov=np.zeros(mcm_w.shape[:-1]+(ksize,3,3,))

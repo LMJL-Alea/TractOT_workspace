@@ -44,9 +44,9 @@ TRACTS=args.tracts
 
 print(list_d)
 list_subjects=[subjects1,subjects2]
-print(list_subjects)
+#print(list_subjects)
 
-n_seed=100
+n_seed=1000
 n_neighbors=3
 train_size=0.75
 
@@ -77,7 +77,7 @@ for l,TRACT in enumerate(TRACTS):
 y=[]
 for i in range(nb_dataset):
     y+=len(list_subjects[i])*[i]
-print('y',y,flush=True)
+#print('y',y,flush=True)
 X=np.arange(M.shape[2])
 
 res=np.zeros((M.shape[0],M.shape[1]))
