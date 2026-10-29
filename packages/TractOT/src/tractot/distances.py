@@ -528,30 +528,26 @@ def distance_coresMAS_svm(m1,m2,wI1,wI2,I1,I2,w1,w2,S1,S2,labels_svm1,labels_svm
 
     profiles distance: list of numpy array
         Distance along each cores MAS, after optimal assignment of each MAS
-        
+    
+    profiles_ idx: list of numpy array
+        Corresponding indices for profiles_distance        
+    
     sigma: numpy array
         Optimal permutations between the two sets of MAS
         Is shape us nb_MAS
-        
-    C : numpy array
-        Matrix of pairwise MW_alpha distances between two MAS
-        Is shape is nb_MASxnb_MAS
-        
-    C_nb_MAP : numpy array
-        Number of MAP used to compute the distances between the two map. That is the intersection of the two set of labels
-        Is shape is nb_MASxnb_MAS
         
     """   
     if beta is None:
         beta=alpha
     #Compute assignement wrt to cost matrix computed with beta
-    C,C_nb_MAP=distances_MAS_svm(m1,m2,wI1,wI2,I1,I2,w1,w2,S1,S2,labels_svm1,labels_svm2,alpha=beta,sum_or_max=sum_or_max)
+    C,_=distances_MAS_svm(m1,m2,wI1,wI2,I1,I2,w1,w2,S1,S2,labels_svm1,labels_svm2,alpha=beta,sum_or_max=sum_or_max)
     P=ot.emd([],[],C)
     sigma=np.nonzero(P)[1]
     
     #Compute OT distance with previous assignment and cost matrix computed with alpha
     L1=len(m1)
     profiles_distances=[]
+    profiles_idx=[]
     cost_array=np.zeros(L1)
 
     for l in range(L1):
@@ -568,6 +564,7 @@ def distance_coresMAS_svm(m1,m2,wI1,wI2,I1,I2,w1,w2,S1,S2,labels_svm1,labels_svm
                 S1[l][labels_svm1[l]==idx][0],S2[sigma[l]][labels_svm2[sigma[l]]==idx][0],
                 alpha=alpha)]
         profiles_distances+=[np.array(cost_l)/labels_svm_intersect.shape[0]]
+        profiles_idx+=[labels_svm_intersect]
         
         if sum_or_max=='sum':
             cost_array[l]=sum(cost_l)/labels_svm_intersect.shape[0]
@@ -580,7 +577,7 @@ def distance_coresMAS_svm(m1,m2,wI1,wI2,I1,I2,w1,w2,S1,S2,labels_svm1,labels_svm
     if sum_or_max=='max':
         cost=np.max(cost_array)/L1
         
-    return cost,profiles_distances,sigma,C,C_nb_MAP    
+    return cost,profiles_distances,profiles_idx,sigma    
 
 def distances_SAS_svm(m1,m2,w1,w2,Scalar1,Scalar2,labels_svm1,labels_svm2,alpha=0.5,sum_or_max='sum'):
     """
@@ -695,33 +692,29 @@ def distance_coresSAS_svm(m1,m2,w1,w2,Scalar1,Scalar2,labels_svm1,labels_svm2,al
     cost: positive number
         Distance between two sets of SAS, after optimal assignment of each SAS
 
-    profiles distance: list of numpy array
+    profiles_distance: list of numpy array
         Distance along each cores SAS, after optimal assignment of each MAS
 
+    profiles_ idx: list of numpy array
+        Corresponding indices for profiles_distance
+        
     sigma: numpy array
         Optimal permutations between the two sets of SAS
         Is shape us nb_SAS
-        
-    C : numpy array
-        Matrix of pairwise W distances between two SAS
-        Is shape is nb_SASxnb_SAS
-        
-    C_nb_SAS : numpy array
-        Number of SAP used to compute the distances between the two map. That is the intersection of the two set of labels
-        Is shape is nb_SASxnb_SAS
         
     """ 
     if beta is None:
         beta=alpha
         
     #Compute assignement wrt to cost matrix computed with beta
-    C,C_nb_SAP=distances_SAS_svm(m1,m2,w1,w2,Scalar1,Scalar2,labels_svm1,labels_svm2,alpha=beta,sum_or_max=sum_or_max)
+    C,_=distances_SAS_svm(m1,m2,w1,w2,Scalar1,Scalar2,labels_svm1,labels_svm2,alpha=beta,sum_or_max=sum_or_max)
     P=ot.emd([],[],C)
     sigma=np.nonzero(P)[1]
     
     #Compute OT distance with previous assignment and cost matrix computed with alpha
     L1=len(m1)
     profiles_distances=[]
+    profiles_idx=[]
     cost_array=np.zeros(L1)
     for l in range(L1):
         labels_svm_intersect=np.intersect1d(labels_svm1[l],labels_svm2[sigma[l]])
@@ -732,6 +725,7 @@ def distance_coresSAS_svm(m1,m2,w1,w2,Scalar1,Scalar2,labels_svm1,labels_svm2,al
             else:
                 cost_l+=[alpha*np.sum((m1[l][labels_svm1[l]==idx][0]-m2[sigma[l]][labels_svm2[sigma[l]]==idx][0])**2)+(1-alpha)*ot.emd2_1d(Scalar1[l][labels_svm1[l]==idx][0],Scalar2[sigma[l]][labels_svm2[sigma[l]]==idx][0],w1[l][labels_svm1[l]==idx][0],w2[sigma[l]][labels_svm2[sigma[l]]==idx][0],p=2)] #use the 1d Wasserstein distance
         profiles_distances+=[np.array(cost_l)/labels_svm_intersect.shape[0]]
+        profiles_idx+=[labels_svm_intersect]
         
         if sum_or_max=='sum':
             cost_array[l]=sum(cost_l)/labels_svm_intersect.shape[0]
@@ -744,7 +738,7 @@ def distance_coresSAS_svm(m1,m2,w1,w2,Scalar1,Scalar2,labels_svm1,labels_svm2,al
     if sum_or_max=='max':
         cost=np.max(cost_array)/L1
         
-    return cost,profiles_distances,sigma,C,C_nb_SAP 
+    return cost,profiles_distances,profiles_idx,sigma 
 '''
 def distance_aniso(S1,S2):
     """
